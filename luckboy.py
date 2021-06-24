@@ -1,11 +1,9 @@
 # coding:utf-8
-import random
 import re
-import requests
 from urllib import request
-import time
 
-from logger import Logger
+import requests
+from loguru import logger
 
 title = '彩票中奖通知'
 SCKEY = ''
@@ -60,15 +58,17 @@ def lucklyResult(selectRed, selectBlue, qh, red, blue, winnerCondition):
         for index in range(len(value['red'])):
             if len(luckly_red) == int(''.join(
                     str(e) for e in value['red']
-                [index:index + 1])) and luckly_blue == str_to_bool(''.join(
-                    str(e) for e in value['blue'][index:index + 1])):
+                    [index:index + 1])) and luckly_blue == str_to_bool(''.join(
+                str(e) for e in value['blue'][index:index + 1])):
                 return key, value['money'], qh, red, blue
 
 
 def main():
-    log = Logger('luckboy.log', level='info')
+    url = "http://zx.500.com/ssq/"
+    logger.add("luckboy_{time}.log")
+    logger.info("--START--")
 
-    qh, red, blue, redmoney = getResult()
+    qh, red, blue, redmoney = getResult(url)
 
     # 中奖条件
     oneprize = redmoney[0]  # 一等奖的奖金
@@ -112,15 +112,21 @@ def main():
         }
     }
 
-    result = lucklyResult(selectRed, selectBlue, qh,
-                          red, blue, winnerCondition)
+    result = lucklyResult(
+        selectRed,
+        selectBlue,
+        qh,
+        red,
+        blue,
+        winnerCondition
+    )
     if result:
         content = '期数:{0}\t开奖号码:{1}:{2}'.format(
             result[2], result[3],
             result[4]) + '\t' + '中奖结果:{0}, 每注奖金:{1}元'.format(
-                result[0], result[1])
+            result[0], result[1])
 
-        log.logger.info(content)
+        logger.info(content)
 
         # 微信通知中奖结果
         zj_jg = result[0]
@@ -128,6 +134,7 @@ def main():
             payload = {'text': title, 'desp': content}
             url = 'https://sc.ftqq.com/{}.send'.format(SCKEY)
             requests.post(url, params=payload, timeout=timeout)
+    logger.info("--END--")
 
 
 if __name__ == "__main__":
