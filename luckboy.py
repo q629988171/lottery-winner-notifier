@@ -6,7 +6,7 @@ import requests
 from loguru import logger
 
 title = '彩票中奖通知'
-SCKEY = ''
+SendKey = ''
 # 我的投注号码
 selectRed = [0, 0, 0, 0, 0, 0]
 selectBlue = [0]
@@ -65,7 +65,7 @@ def lucklyResult(selectRed, selectBlue, qh, red, blue, winnerCondition):
 
 def main():
     url = "http://zx.500.com/ssq/"
-    logger.add("luckboy_{time}.log")
+    logger.add("logs/luckboy_{time}.log")
     logger.info("--START--")
 
     qh, red, blue, redmoney = getResult(url)
@@ -132,7 +132,7 @@ def main():
         zj_jg = result[0]
         if zj_jg != '未中奖':
             payload = {'text': title, 'desp': content}
-            url = 'https://sc.ftqq.com/{}.send'.format(SCKEY)
+            url = 'https://sctapi.ftqq.com/{}.send'.format(SendKey)
             requests.post(url, params=payload, timeout=timeout)
     logger.info("--END--")
 
